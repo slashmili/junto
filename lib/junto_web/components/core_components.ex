@@ -181,6 +181,42 @@ defmodule JuntoWeb.CoreComponents do
 
   ## Examples
 
+      <.signup_form for={@form} phx-change="validate" phx-submit="save">
+        <.input field={@form[:email]} label="Email"/>
+        <.input field={@form[:username]} label="Username" />
+        <:actions>
+          <.button>Save</.button>
+        </:actions>
+      </.signup_form>
+  """
+  attr :for, :any, required: true, doc: "the datastructure for the form"
+  attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
+
+  attr :rest, :global,
+    include: ~w(autocomplete name rel action enctype method novalidate target multipart),
+    doc: "the arbitrary HTML attributes to apply to the form tag"
+
+  slot :inner_block, required: true
+  slot :actions, doc: "the slot for form actions, such as a submit button"
+
+  def signup_form(assigns) do
+    ~H"""
+    <.form :let={f} for={@for} as={@as} {@rest}>
+      <div class="">
+        <%= render_slot(@inner_block, f) %>
+        <div :for={action <- @actions} class="">
+          <%= render_slot(action, f) %>
+        </div>
+      </div>
+    </.form>
+    """
+  end
+
+  @doc """
+  Renders a simple form.
+
+  ## Examples
+
       <.simple_form for={@form} phx-change="validate" phx-submit="save">
         <.input field={@form[:email]} label="Email"/>
         <.input field={@form[:username]} label="Username" />
@@ -231,8 +267,8 @@ defmodule JuntoWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "phx-submit-loading:opacity-75 phx-submit-loading:btn-outline ",
+        "btn btn-primary",
         @class
       ]}
       {@rest}
@@ -377,7 +413,7 @@ defmodule JuntoWeb.CoreComponents do
         id={@id}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
+          "input input-bordered flex items-center gap-2",
           "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
           @errors == [] && "border-zinc-300 focus:border-zinc-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
@@ -385,6 +421,106 @@ defmodule JuntoWeb.CoreComponents do
         {@rest}
       />
       <.error :for={msg <- @errors}><%= msg %></.error>
+    </div>
+    """
+  end
+
+  attr :id, :any, default: nil
+  attr :name, :any
+  attr :label, :string, default: nil
+  attr :icon, :string, default: nil
+  attr :value, :any
+
+  attr :type, :string,
+    default: "text",
+    values: ~w(checkbox color date datetime-local email file hidden month number password
+               range radio search select tel text textarea time url week)
+
+  attr :field, Phoenix.HTML.FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :errors, :list, default: []
+  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
+  attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
+  attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
+  attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+
+  attr :rest, :global,
+    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+                multiple pattern placeholder readonly required rows size step)
+
+  slot :inner_block
+
+  def input_center(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
+    assigns
+    |> assign(field: nil, id: assigns.id || field.id)
+    |> assign(:errors, Enum.map(field.errors, &translate_error(&1)))
+    |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
+    |> assign_new(:value, fn -> field.value end)
+    |> input_center()
+  end
+
+  def input_center(assigns) do
+    ~H"""
+    <div phx-feedback-for={@name}>
+      <label class="form-control w-full max-w-sm">
+        <div class="label">
+          <.label for={@id}><%= @label %></.label>
+        </div>
+
+        <label class={[
+          "input flex items-center gap-2 w-full max-w-sm",
+          @errors == [] && "input-bordered",
+          @errors != [] && "input-error"
+        ]}>
+          <%= if @icon do %>
+            <.icon name={@icon} class="w-4 h-4 opacity-70" />
+          <% end %>
+          <input
+            type={@type}
+            name={@name}
+            id={@id}
+            value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+            class="grow"
+            {@rest}
+          />
+        </label>
+        <div class="label">
+          <.error2 :for={msg <- @errors}><%= msg %></.error2>
+        </div>
+      </label>
+    </div>
+    """
+  end
+
+  def input_center(assigns) do
+    ~H"""
+    <div phx-feedback-for={@name}>
+      <.label for={@id}><%= @label %></.label>
+      <label class="input input-bordered flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          class="w-4 h-4 opacity-70"
+        >
+          <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+        </svg>
+        <input
+          type={@type}
+          name={@name}
+          id={@id}
+          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          class={[
+            "grow",
+            "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
+            @errors == [] && "border-zinc-300 focus:border-zinc-400",
+            @errors != [] && "border-rose-400 focus:border-rose-400"
+          ]}
+          {@rest}
+        />
+        <.error2 :for={msg <- @errors}><%= msg %></.error2>
+      </label>
     </div>
     """
   end
@@ -397,7 +533,7 @@ defmodule JuntoWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label for={@for} class="block">
       <%= render_slot(@inner_block) %>
     </label>
     """
@@ -410,6 +546,21 @@ defmodule JuntoWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+      <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
+      <%= render_slot(@inner_block) %>
+    </p>
+    """
+  end
+
+  @doc """
+  Generates a generic error message.
+  """
+  slot :inner_block, required: true
+
+  def error2(assigns) do
+    ~H"""
+    <div></div>
     <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
       <%= render_slot(@inner_block) %>

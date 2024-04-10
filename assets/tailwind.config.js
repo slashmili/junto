@@ -7,7 +7,12 @@ const path = require("path")
 
 module.exports = {
   daisyui: {
-    logs: false,
+    logs: true,
+    themes: [
+      "light",
+      "dracula", 
+      {dark: {  ...require("daisyui/src/theming/themes")["dracula"]}},
+    ],
   },
   content: [
     "./js/**/*.js",
