@@ -31,6 +31,7 @@ defmodule JuntoWeb.UserRegistrationLive do
         phx-trigger-action={@trigger_submit}
         action={~p"/users/log_in?_action=registered"}
         method="post"
+        phx-hook="InputOtpGroup"
       >
         <.input type="hidden" field={@otp_form[:email]} />
         <div class="hidden">
@@ -51,7 +52,7 @@ defmodule JuntoWeb.UserRegistrationLive do
 
         <:actions>
           <br />
-          <.button phx-disable-with="Creating account..." class="w-full max-w-sm">
+          <.button id="btn-otp-submit" phx-disable-with="Creating account..." class="w-full max-w-sm">
             Create an account
           </.button>
         </:actions>
@@ -66,8 +67,9 @@ defmodule JuntoWeb.UserRegistrationLive do
       <input
         type="text"
         name={@name}
-        class="input input-bordered text-center w-12 h-12"
+        class="input input-bordered text-center w-12 h-12 input-otp"
         maxlength="1"
+        autocomplete="off"
         required
       />
     </div>
