@@ -26,7 +26,7 @@ defmodule JuntoWeb.UserRegistrationLiveTest do
 
       result =
         lv
-        |> element("#registration_form")
+        |> element("#registration-form")
         |> render_change(user: %{"email" => "with spaces"})
 
       assert result =~ "Register"
@@ -39,10 +39,10 @@ defmodule JuntoWeb.UserRegistrationLiveTest do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
       email = unique_user_email()
-      form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
+      form = form(lv, "#registration-form", user: valid_user_attributes(email: email))
       render_submit(form)
 
-      assert has_element?(lv, "#otp_form")
+      assert has_element?(lv, "#otp-form")
     end
 
     test "creates account and logs the user in", %{conn: conn} do
@@ -50,7 +50,7 @@ defmodule JuntoWeb.UserRegistrationLiveTest do
 
       email = unique_user_email()
 
-      form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
+      form = form(lv, "#registration-form", user: valid_user_attributes(email: email))
       render_submit(form)
 
       import Swoosh.TestAssertions
@@ -72,16 +72,18 @@ defmodule JuntoWeb.UserRegistrationLiveTest do
       assert_received({:otp_token, otp_token})
 
       params = [
-        otp_1: String.at(otp_code, 0),
-        otp_2: String.at(otp_code, 1),
-        otp_3: String.at(otp_code, 2),
-        otp_4: String.at(otp_code, 3),
-        otp_5: String.at(otp_code, 4),
-        otp_6: String.at(otp_code, 5),
+        otp: [
+          String.at(otp_code, 0),
+          String.at(otp_code, 1),
+          String.at(otp_code, 2),
+          String.at(otp_code, 3),
+          String.at(otp_code, 4),
+          String.at(otp_code, 5)
+        ],
         user: %{otp_token: otp_token, email: email}
       ]
 
-      form = form(lv, "#otp_form", params)
+      form = form(lv, "#otp-form", params)
       render_submit(form, %{user: %{otp_token: otp_token}})
       conn = follow_trigger_action(form, conn)
 
@@ -97,13 +99,13 @@ defmodule JuntoWeb.UserRegistrationLiveTest do
 
       user = user_fixture(%{email: "test@email.com"})
 
-        lv
-        |> form("#registration_form",
-          user: %{"email" => user.email}
-        )
-        |> render_submit()
+      lv
+      |> form("#registration-form",
+        user: %{"email" => user.email}
+      )
+      |> render_submit()
 
-      assert has_element?(lv, "#otp_form")
+      assert has_element?(lv, "#otp-form")
     end
   end
 end
