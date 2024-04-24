@@ -1,6 +1,5 @@
 export default {
   mounted () {
-    const thisForm = this.el
     const otpInputs = Array.from(this.el.getElementsByClassName('input-otp'))
     const len = otpInputs.length
 
@@ -20,7 +19,12 @@ export default {
     const handleKeyUp = (event) => {
       const input = event.currentTarget
       const i = otpInputs.indexOf(input)
-      if (input.value && (i+1) == len) document.getElementById('btn-otp-submit').click()
+      if (input.value && (i+1) == len) {
+	otpInputs[i - 1]?.dispatchEvent(
+	  new Event("input", {bubbles: true})
+	)
+	document.getElementById('btn-otp-submit').click()
+      }
     }
 
     const handlePaste = (event) => {
