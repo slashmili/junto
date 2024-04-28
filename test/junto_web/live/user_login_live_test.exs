@@ -35,7 +35,7 @@ defmodule JuntoWeb.UserLoginLiveTest do
       assert has_element?(lv, "#otp-form")
     end
 
-    test "veirfy the account and logs the user in", %{conn: conn} do
+    test "verify the account and logs the user in", %{conn: conn} do
       user = user_fixture(confirmed_at: DateTime.utc_now())
       {:ok, lv, _html} = live(conn, ~p"/users/log_in")
 
@@ -62,6 +62,24 @@ defmodule JuntoWeb.UserLoginLiveTest do
       conn = follow_trigger_action(form, conn)
 
       assert redirected_to(conn) == ~p"/"
+    end
+
+    test "renders error when invalid OTP is entered", %{conn: conn} do
+      user = user_fixture(confirmed_at: DateTime.utc_now())
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
+
+      lv
+      |> form("#login-form", user: %{email: user.email})
+      |> render_submit()
+
+      {_otp_code, otp_token} = Junto.AccountsFixtures.fetch_otp_token()
+
+      params = [otp: [0, 0, 0, 0, 0, 0], user: %{otp_token: otp_token, email: user.email}]
+
+      form = form(lv, "#otp-form", params)
+      render_submit(form, %{user: %{otp_token: otp_token}})
+
+      assert has_element?(lv, "[data-role=invalid-otp-code-error]")
     end
   end
 end

@@ -39,7 +39,9 @@ defmodule JuntoWeb.UserLive.OtpFormComponent do
             <.otp_input name="otp[]" />
           </div>
           <.error :if={@check_errors}>
-            Invalid Code
+            <span data-role="invalid-otp-code-error">
+              Invalid Code
+            </span>
           </.error>
 
           <:actions>
