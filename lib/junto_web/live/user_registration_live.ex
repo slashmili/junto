@@ -2,6 +2,24 @@ defmodule JuntoWeb.UserRegistrationLive do
   use JuntoWeb, :live_view
   require Logger
 
+  alias Junto.Accounts
+
+  defp register_action(user_params) do
+    case Accounts.register_user(user_params) do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Ecto.Changeset{errors: [email: {"has already been taken", _}]}} ->
+        user = Accounts.get_user_by_email(user_params["email"])
+
+        if Accounts.active_user?(user) do
+          {:error, :register_active_user}
+        else
+          {:ok, user}
+        end
+    end
+  end
+
   def render(assigns) do
     ~H"""
     <div data-role="register-dialog" class="container mx-auto max-w-sm md:py-48 py-12">
@@ -12,10 +30,17 @@ defmodule JuntoWeb.UserRegistrationLive do
           id="registration-form"
           changeset={@changeset}
           form={@form}
-        />
+          page_action={&register_action/1}
+          submit_loading="Creating account..."
+        >
+          <:subtitle>
+            Register for an account
+          </:subtitle>
+        </.live_component>
 
         <.live_component
           :if={@check_otp}
+          action={~p"/users/log_in?_action=registered"}
           module={JuntoWeb.UserLive.OtpFormComponent}
           changeset={@changeset}
           user={@user}
@@ -45,6 +70,18 @@ defmodule JuntoWeb.UserRegistrationLive do
       check_otp: params.check_otp,
       changeset: params.changeset,
       otp_token: params.otp_token
+    ]
+
+    {:noreply, assign(socket, params_to_set)}
+  end
+
+  def handle_info({JuntoWeb.UserLive.LoginRegisterFormComponent, {:active_user, params}}, socket) do
+    params_to_set = [
+      user: params.user,
+      otp: "",
+      check_otp: params.check_otp,
+      changeset: params.changeset,
+      otp_token: ""
     ]
 
     {:noreply, assign(socket, params_to_set)}

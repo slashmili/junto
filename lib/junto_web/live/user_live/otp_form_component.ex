@@ -21,7 +21,7 @@ defmodule JuntoWeb.UserLive.OtpFormComponent do
           phx-submit="save"
           phx-change="validate"
           phx-trigger-action={@trigger_submit}
-          action={~p"/users/log_in?_action=registered"}
+          action={@action}
           method="post"
           phx-hook="InputOtpGroup"
         >

@@ -9,7 +9,8 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
     ~H"""
     <div class="card-body">
       <h2 class="card-title">Welcome to Junto</h2>
-      Register for an account
+
+      <%= render_slot(@subtitle) %>
       <.simple_form
         for={@form}
         id={@id}
@@ -28,7 +29,7 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
           autocomplete="email webauthn"
         />
         <:actions>
-          <.button phx-disable-with="Creating account..." class="w-full max-w-sm">
+          <.button phx-disable-with={@submit_loading} class="w-full max-w-sm">
             Continue with email
           </.button>
         </:actions>
@@ -60,7 +61,7 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
   def handle_event("save", %{"user" => user_params}, socket) do
     {otp_code, otp_token} = create_otp_code()
 
-    case register_or_return_user(user_params) do
+    case socket.assigns.page_action.(user_params) do
       {:ok, user} ->
         {:ok, _} =
           Accounts.deliver_user_otp_code(
@@ -83,29 +84,22 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
 
         notify_parent({:valid_user, params})
 
-        {:noreply,
-         socket
-         |> assign(
-           check_otp: true,
-           otp: otp_code,
-           otp_token: otp_token,
-           changeset: changeset,
-           user: user
-         )}
+        {:noreply, socket}
 
-      {:error, :active_user} ->
+      {:error, :register_active_user} ->
         changeset = Accounts.change_user_registration(%User{}, user_params)
 
-        {:noreply,
-         socket
-         |> assign(
-           check_otp: true,
-           otp: otp_code,
-           otp_token: otp_token,
-           changeset: changeset,
-           user: %{email: user_params["email"]}
-         )
-         |> assign_otp_form(changeset)}
+        params = %{
+          check_otp: true,
+          otp: otp_code,
+          otp_token: otp_token,
+          changeset: changeset,
+          user: Accounts.get_user_by_email(user_params["email"])
+        }
+
+        notify_parent({:active_user, params})
+
+        {:noreply, socket}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}
@@ -126,27 +120,6 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
     short_otp_code = :crypto.strong_rand_bytes(3) |> Base.encode16()
     long_token = short_otp_code <> :crypto.strong_rand_bytes(29)
     {short_otp_code, long_token}
-  end
-
-  defp register_or_return_user(user_params) do
-    case Accounts.register_user(user_params) do
-      {:ok, user} ->
-        {:ok, user}
-
-      {:error, %Ecto.Changeset{errors: [email: {"has already been taken", _}]}} ->
-        user = Accounts.get_user_by_email(user_params["email"])
-
-        if Accounts.active_user?(user) do
-          {:error, :active_user}
-        else
-          {:ok, user}
-        end
-    end
-  end
-
-  defp assign_otp_form(socket, changeset) do
-    send(self(), {:assign_otp_form, changeset})
-    socket
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})

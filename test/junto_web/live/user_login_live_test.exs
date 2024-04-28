@@ -6,9 +6,9 @@ defmodule JuntoWeb.UserLoginLiveTest do
 
   describe "Log in page" do
     test "renders log in page", %{conn: conn} do
-      {:ok, _lv, html} = live(conn, ~p"/users/log_in")
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
 
-      assert html =~ "Sign in to account"
+      assert has_element?(lv, "[data-role=login-dialog]")
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -23,62 +23,45 @@ defmodule JuntoWeb.UserLoginLiveTest do
   end
 
   describe "user login" do
-    test "redirects if user login with valid credentials", %{conn: conn} do
-      user = user_fixture()
+    test "enter email and expect to see otp form", %{conn: conn} do
+      user = user_fixture(confirmed_at: DateTime.utc_now())
 
       {:ok, lv, _html} = live(conn, ~p"/users/log_in")
 
-      form =
-        form(lv, "#login_form", user: %{email: user.email, remember_me: true})
+      lv
+      |> form("#login-form", user: %{email: user.email})
+      |> render_submit()
 
-      conn = submit_form(form, conn)
+      assert has_element?(lv, "#otp-form")
+    end
+
+    test "veirfy the account and logs the user in", %{conn: conn} do
+      user = user_fixture(confirmed_at: DateTime.utc_now())
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
+
+      lv
+      |> form("#login-form", user: %{email: user.email})
+      |> render_submit()
+
+      {otp_code, otp_token} = Junto.AccountsFixtures.fetch_otp_token()
+
+      params = [
+        otp: [
+          String.at(otp_code, 0),
+          String.at(otp_code, 1),
+          String.at(otp_code, 2),
+          String.at(otp_code, 3),
+          String.at(otp_code, 4),
+          String.at(otp_code, 5)
+        ],
+        user: %{otp_token: otp_token, email: user.email}
+      ]
+
+      form = form(lv, "#otp-form", params)
+      render_submit(form, %{user: %{otp_token: otp_token}})
+      conn = follow_trigger_action(form, conn)
 
       assert redirected_to(conn) == ~p"/"
-    end
-
-    test "redirects to login page with a flash error if there are no valid credentials", %{
-      conn: conn
-    } do
-      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
-
-      form =
-        form(lv, "#login_form",
-          user: %{email: "test@email.com", password: "123456", remember_me: true}
-        )
-
-      conn = submit_form(form, conn)
-
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"
-
-      assert redirected_to(conn) == "/users/log_in"
-    end
-  end
-
-  describe "login navigation" do
-    test "redirects to registration page when the Register button is clicked", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
-
-      {:ok, _login_live, login_html} =
-        lv
-        |> element(~s|main a:fl-contains("Sign up")|)
-        |> render_click()
-        |> follow_redirect(conn, ~p"/users/register")
-
-      assert login_html =~ "Register"
-    end
-
-    test "redirects to forgot password page when the Forgot Password button is clicked", %{
-      conn: conn
-    } do
-      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
-
-      {:ok, conn} =
-        lv
-        |> element(~s|main a:fl-contains("Forgot your password?")|)
-        |> render_click()
-        |> follow_redirect(conn, ~p"/users/reset_password")
-
-      assert conn.resp_body =~ "Forgot your password?"
     end
   end
 end
