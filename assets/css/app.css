@@ -3,3 +3,10 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+.login-register-dialog {
+  @apply container mx-auto max-w-sm md:py-48 py-12;
+  & .card {
+    @apply shadow-xl bg-white/50 dark:bg-white/5 overflow-visible border dark:border-white/10 border-black/10;
+  }
+}

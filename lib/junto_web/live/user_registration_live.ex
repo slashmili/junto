@@ -22,8 +22,8 @@ defmodule JuntoWeb.UserRegistrationLive do
 
   def render(assigns) do
     ~H"""
-    <div data-role="register-dialog" class="container mx-auto max-w-sm md:py-48 py-12">
-      <div class="card shadow-xl w-100 bg-white/50 dark:bg-white/5 overflow-visible border dark:border-white/10 border-black/10">
+    <div data-role="register-dialog" class="login-register-dialog">
+      <div class="card">
         <.live_component
           :if={not @check_otp}
           module={JuntoWeb.UserLive.LoginRegisterFormComponent}
