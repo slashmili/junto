@@ -22,6 +22,8 @@ config :junto, JuntoWeb.Endpoint,
   pubsub_server: Junto.PubSub,
   live_view: [signing_salt: "xRPbRYzr"]
 
+config :junto, JuntoWeb.Gettext, default_locale: "en", locales: ["en", "de"]
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

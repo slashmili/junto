@@ -12,7 +12,7 @@ defmodule JuntoWeb.UserLive.OtpFormComponent do
         <.icon name="hero-chevron-left" class="" />
       </button>
       <div class="card-body">
-        <h2 class="card-title">Enter Code</h2>
+        <h2 class="card-title"><%= gettext "Enter Code" %></h2>
         Please enter the code digit we sent to <%= @user.email %>.
         <.simple_form
           for={@otp_form}
@@ -40,7 +40,7 @@ defmodule JuntoWeb.UserLive.OtpFormComponent do
           </div>
           <.error :if={@check_errors}>
             <span data-role="invalid-otp-code-error">
-              Invalid Code
+              <%= gettext "Invalid Code" %>
             </span>
           </.error>
 
@@ -48,7 +48,7 @@ defmodule JuntoWeb.UserLive.OtpFormComponent do
             <br />
             <.button
               id="btn-otp-submit"
-              phx-disable-with="Creating account..."
+              phx-disable-with={gettext "Creating account..."}
               class="w-full max-w-sm"
             >
               Create an account

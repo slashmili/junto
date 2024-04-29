@@ -8,7 +8,7 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
   def render(assigns) do
     ~H"""
     <div class="card-body">
-      <h2 class="card-title">Welcome to Junto</h2>
+      <h2 class="card-title"><%= gettext "Welcome to Junto" %></h2>
 
       <%= render_slot(@subtitle) %>
       <.simple_form
@@ -22,7 +22,7 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
         <.input_center
           field={@form[:email]}
           type="email"
-          label="Email"
+          label={gettext "Email"}
           placeholder="you@email.com"
           icon="hero-envelope-solid"
           required
@@ -30,7 +30,7 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
         />
         <:actions>
           <.button phx-disable-with={@submit_loading} class="w-full max-w-sm">
-            Continue with email
+            <%= gettext "Continue with email" %>
           </.button>
         </:actions>
       </.simple_form>
@@ -83,6 +83,21 @@ defmodule JuntoWeb.UserLive.LoginRegisterFormComponent do
         }
 
         notify_parent({:valid_user, params})
+
+        {:noreply, socket}
+
+      {:error, :not_found} ->
+        changeset = Accounts.change_user_registration(%User{}, user_params)
+
+        params = %{
+          check_otp: true,
+          otp: otp_code,
+          otp_token: otp_token,
+          changeset: changeset,
+          user: %{email: user_params["email"]}
+        }
+
+        notify_parent({:user_not_found, params})
 
         {:noreply, socket}
 

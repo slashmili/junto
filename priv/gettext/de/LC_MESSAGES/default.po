@@ -1,0 +1,93 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/junto_web/components/core_components.ex:598
+#, elixir-autogen, elixir-format
+msgid "Actions"
+msgstr "Aktionen"
+
+#: lib/junto_web/components/core_components.ex:160
+#, elixir-autogen, elixir-format
+msgid "Attempting to reconnect"
+msgstr "Wiederverbindung wird versucht"
+
+#: lib/junto_web/live/user_live/login_register_form_component.ex:33
+#, elixir-autogen, elixir-format
+msgid "Continue with email"
+msgstr "Weiter mit E-Mail"
+
+#: lib/junto_web/live/user_live/otp_form_component.ex:51
+#, elixir-autogen, elixir-format
+msgid "Creating account..."
+msgstr "Account erstellen..."
+
+#: lib/junto_web/live/user_live/login_register_form_component.ex:25
+#, elixir-autogen, elixir-format
+msgid "Email"
+msgstr "E-Mail"
+
+#: lib/junto_web/live/user_live/otp_form_component.ex:15
+#, elixir-autogen, elixir-format
+msgid "Enter Code"
+msgstr "Code eingeben"
+
+#: lib/junto_web/components/core_components.ex:151
+#, elixir-autogen, elixir-format
+msgid "Error!"
+msgstr "Fehler!"
+
+#: lib/junto_web/components/core_components.ex:172
+#, elixir-autogen, elixir-format
+msgid "Hang in there while we get back on track"
+msgstr "Bleibst du dran, während wir wieder auf den richtigen Weg kommen"
+
+#: lib/junto_web/live/user_live/otp_form_component.ex:43
+#, elixir-autogen, elixir-format
+msgid "Invalid Code"
+msgstr "Ungültiger Code"
+
+#: lib/junto_web/live/user_login_live.ex:32
+#, elixir-autogen, elixir-format
+msgid "Sign in"
+msgstr "Anmelden"
+
+#: lib/junto_web/components/core_components.ex:167
+#, elixir-autogen, elixir-format
+msgid "Something went wrong!"
+msgstr "Etwas ist schief gelaufen!"
+
+#: lib/junto_web/components/core_components.ex:150
+#, elixir-autogen, elixir-format
+msgid "Success!"
+msgstr "Erfolg!"
+
+#: lib/junto_web/components/core_components.ex:155
+#, elixir-autogen, elixir-format
+msgid "We can't find the internet"
+msgstr "Wir können das Internet nicht finden"
+
+#: lib/junto_web/live/user_live/login_register_form_component.ex:11
+#, elixir-autogen, elixir-format
+msgid "Welcome to Junto"
+msgstr "Willkommen bei Junto"
+
+#: lib/junto_web/components/core_components.ex:76
+#: lib/junto_web/components/core_components.ex:130
+#, elixir-autogen, elixir-format
+msgid "close"
+msgstr "schließen"
+
+#: lib/junto_web/live/user_registration_live.ex:37
+#, elixir-autogen, elixir-format
+msgid "Register for an account"
+msgstr "Meldest du dich für ein Konto"

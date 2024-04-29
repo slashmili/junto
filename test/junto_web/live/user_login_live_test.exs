@@ -81,5 +81,17 @@ defmodule JuntoWeb.UserLoginLiveTest do
 
       assert has_element?(lv, "[data-role=invalid-otp-code-error]")
     end
+
+    test "renders OTP form when an none existing email is entered", %{conn: conn} do
+      email = "foo@bar.com"
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
+
+      lv
+      |> form("#login-form", user: %{email: email})
+      |> render_submit()
+
+
+      assert has_element?(lv, "#otp-form")
+    end
   end
 end

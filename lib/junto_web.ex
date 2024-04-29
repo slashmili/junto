@@ -54,6 +54,7 @@ defmodule JuntoWeb do
       use Phoenix.LiveView,
         layout: {JuntoWeb.Layouts, :app}
 
+      on_mount JuntoWeb.RestoreLocale
       unquote(html_helpers())
     end
   end

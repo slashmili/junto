@@ -34,7 +34,7 @@ defmodule JuntoWeb.UserRegistrationLive do
           submit_loading="Creating account..."
         >
           <:subtitle>
-            Register for an account
+            <%= gettext "Register for an account" %>
           </:subtitle>
         </.live_component>
 
